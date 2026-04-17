@@ -1,0 +1,13 @@
+# Compiled output
+out/
+*.js.map
+
+# Dependencies
+node_modules/
+
+# Packaged extension
+*.vsix
+
+# OS
+.DS_Store
+Thumbs.db

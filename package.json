@@ -1,0 +1,334 @@
+{
+  "name": "mcp-server-explorer-copilot-ready",
+  "displayName": "MCP Server Explorer · Copilot Ready",
+  "description": "Browse, manage, and import/export MCP (Model Context Protocol) server configurations from a unified sidebar — no JSON editing required. Copilot-integrated with @mcp-explorer chat participant.",
+  "version": "0.1.1",
+  "publisher": "mohitghodke",
+  "preview": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MohitGhodke/MCPServerExplorer"
+  },
+  "icon": "resources/mcp-icon.png",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Chat",
+    "Other"
+  ],
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "mcp server",
+    "mcp manager",
+    "mcp explorer",
+    "copilot",
+    "github copilot",
+    "ai tools",
+    "chat participant",
+    "configuration"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "mcp-server-explorer.chat",
+        "fullName": "MCP Server Explorer",
+        "name": "mcp-explorer",
+        "description": "Manage MCP server configurations — list, add, diagnose, and share servers.",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "list",
+            "description": "List all configured MCP servers with their status and tool counts"
+          },
+          {
+            "name": "add",
+            "description": "Add a new MCP server by describing it in natural language"
+          },
+          {
+            "name": "diagnose",
+            "description": "Diagnose issues with a specific MCP server"
+          },
+          {
+            "name": "suggest",
+            "description": "Get MCP server recommendations based on your workspace"
+          },
+          {
+            "name": "share",
+            "description": "Share server configuration(s) as formatted JSON for README or clipboard"
+          }
+        ]
+      }
+    ],
+    "languageModelTools": [
+      {
+        "name": "mcpServerExplorer_getServerStatus",
+        "displayName": "Get MCP Server Status",
+        "modelDescription": "Returns a JSON summary of all configured MCP servers including their type, scope, running status, live tool counts, activation history, and configuration. Use this tool when you need to know what MCP servers the user has, which are active, or how many tools are registered.",
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "mcpServerStatus",
+        "icon": "$(server)",
+        "tags": [
+          "mcp",
+          "server",
+          "status",
+          "tools"
+        ]
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mcpServerExplorer",
+          "title": "MCP Server Explorer",
+          "icon": "resources/mcp-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "mcpServerExplorer": [
+        {
+          "id": "mcpServerExplorerSummaryView",
+          "name": "Dashboard",
+          "icon": "resources/mcp-icon.svg",
+          "initialSize": 2
+        },
+        {
+          "id": "mcpServerExplorerServersView",
+          "name": "Server Explorer",
+          "icon": "resources/mcp-icon.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mcpServerExplorer.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.addServer",
+        "title": "Add MCP Server",
+        "icon": "$(add)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.removeServer",
+        "title": "Remove Server",
+        "icon": "$(trash)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.editServer",
+        "title": "Edit Server in Config",
+        "icon": "$(edit)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.openUserConfig",
+        "title": "Open User MCP Config",
+        "icon": "$(go-to-file)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.openWorkspaceConfig",
+        "title": "Open Workspace MCP Config",
+        "icon": "$(go-to-file)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.importServers",
+        "title": "Import Server Configs",
+        "icon": "$(cloud-download)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.exportAllServers",
+        "title": "Export All Server Configs",
+        "icon": "$(cloud-upload)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.exportServer",
+        "title": "Export Server Config",
+        "icon": "$(export)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.copyServerConfig",
+        "title": "Copy Server Config to Clipboard",
+        "icon": "$(clippy)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.refreshSummary",
+        "title": "Refresh Dashboard",
+        "icon": "$(refresh)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.resetStats",
+        "title": "Reset Activity Statistics",
+        "icon": "$(clear-all)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.restartServer",
+        "title": "Restart Server",
+        "icon": "$(debug-restart)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.stopServer",
+        "title": "Stop Server",
+        "icon": "$(debug-stop)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.startServer",
+        "title": "Start Server",
+        "icon": "$(debug-start)",
+        "category": "MCP Server Explorer"
+      },
+      {
+        "command": "mcpServerExplorer.chatAddServer",
+        "title": "Add Server from Chat",
+        "category": "MCP Server Explorer"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mcpServerExplorer.addServer",
+          "when": "view == mcpServerExplorerServersView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mcpServerExplorer.refresh",
+          "when": "view == mcpServerExplorerServersView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "mcpServerExplorer.importServers",
+          "when": "view == mcpServerExplorerServersView",
+          "group": "2_importexport@1"
+        },
+        {
+          "command": "mcpServerExplorer.exportAllServers",
+          "when": "view == mcpServerExplorerServersView",
+          "group": "2_importexport@2"
+        },
+        {
+          "command": "mcpServerExplorer.openUserConfig",
+          "when": "view == mcpServerExplorerServersView",
+          "group": "3_open@1"
+        },
+        {
+          "command": "mcpServerExplorer.openWorkspaceConfig",
+          "when": "view == mcpServerExplorerServersView",
+          "group": "3_open@2"
+        },
+        {
+          "command": "mcpServerExplorer.refreshSummary",
+          "when": "view == mcpServerExplorerSummaryView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mcpServerExplorer.resetStats",
+          "when": "view == mcpServerExplorerSummaryView",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mcpServerExplorer.editServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /^server/ && !(viewItem =~ /_stopped$/)",
+          "group": "inline@1"
+        },
+        {
+          "command": "mcpServerExplorer.copyServerConfig",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /^server/ && !(viewItem =~ /_stopped$/)",
+          "group": "inline@2"
+        },
+        {
+          "command": "mcpServerExplorer.restartServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /^server/ && !(viewItem =~ /_stopped$/)",
+          "group": "inline@3"
+        },
+        {
+          "command": "mcpServerExplorer.stopServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /^server/ && !(viewItem =~ /_stopped$/)",
+          "group": "inline@4"
+        },
+        {
+          "command": "mcpServerExplorer.removeServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /^server/ && !(viewItem =~ /_stopped$/)",
+          "group": "1_danger@1"
+        },
+        {
+          "command": "mcpServerExplorer.startServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /_stopped$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mcpServerExplorer.editServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /_stopped$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "mcpServerExplorer.removeServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /_stopped$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "mcpServerExplorer.exportServer",
+          "when": "view == mcpServerExplorerServersView && viewItem =~ /^server/",
+          "group": "2_export@1"
+        },
+        {
+          "command": "mcpServerExplorer.openUserConfig",
+          "when": "view == mcpServerExplorerServersView && viewItem == scopeUser",
+          "group": "inline@1"
+        },
+        {
+          "command": "mcpServerExplorer.openWorkspaceConfig",
+          "when": "view == mcpServerExplorerServersView && viewItem == scopeWorkspace",
+          "group": "inline@1"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "mcpServerExplorerServersView",
+        "contents": "No MCP servers configured yet.\nAdd a server to get started.\n[Add MCP Server](command:mcpServerExplorer.addServer)\n\nOr open an existing config file:\n[Open User Config](command:mcpServerExplorer.openUserConfig)"
+      },
+      {
+        "view": "mcpServerExplorerSummaryView",
+        "contents": "No MCP servers found.\nConfigure a server to see the dashboard.\n[Add MCP Server](command:mcpServerExplorer.addServer)"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.3.3",
+    "vitest": "^3.1.1"
+  }
+}
