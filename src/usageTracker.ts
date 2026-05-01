@@ -1,20 +1,12 @@
 import * as vscode from 'vscode';
 import { ServerUsageRecord } from './models';
 
-// Minimal shape of what we read from vscode.lm (with feature detection)
-type LmTool = { name: string; tags?: readonly string[] };
-type LmNamespace = {
-  tools?: LmTool[];
-  onDidChangeTools?: vscode.Event<void>;
-};
-
 /**
  * Tracks MCP server activity using VS Code's Language Model Tools API.
  *
  * VS Code exposes every registered LM tool (including those from MCP servers)
  * via `vscode.lm.tools`. When an MCP server starts, its tools appear there;
- * when it stops they disappear. We listen to `vscode.lm.onDidChangeTools` and
- * count each appearance as one "activation".
+ * when it stops they disappear.
  *
  * Tool-to-server mapping uses a prefix convention: a server named "github"
  * registers tools like "github_search_repos". We also try the double-underscore
@@ -22,6 +14,10 @@ type LmNamespace = {
  * direct tag match if VS Code surfaces tags for MCP tools in the future.
  *
  * All counts are persisted in `context.globalState` and survive restarts.
+ *
+ * NOTE: `vscode.lm.onDidChangeTools` was removed in VS Code 1.99+. Tool counts
+ * are now refreshed on-demand (each call to getLiveToolCount reads the current
+ * snapshot) and via a polling interval started here.
  */
 export class UsageTracker implements vscode.Disposable {
 
@@ -77,25 +73,27 @@ export class UsageTracker implements vscode.Disposable {
 
   /** Live count of tools currently registered in VS Code for this server. */
   getLiveToolCount(serverName: string): number {
-    const tools = this.getLm()?.tools ?? [];
-    return (tools as LmTool[]).filter(t => this.matchesServer(serverName, t)).length;
+    if (!this.isLmApiAvailable()) { return 0; }
+    return vscode.lm.tools.filter(t => this.matchesServer(serverName, t)).length;
   }
 
   /** Live total of all LM tools currently registered in VS Code. */
   getTotalLiveTools(): number {
-    return (this.getLm()?.tools as LmTool[] | undefined)?.length ?? 0;
+    if (!this.isLmApiAvailable()) { return 0; }
+    return vscode.lm.tools.length;
   }
 
   /** Names of configured servers that currently have tools visible in VS Code. */
   getActiveServerNames(configuredNames: string[]): string[] {
-    const tools = (this.getLm()?.tools ?? []) as LmTool[];
+    if (!this.isLmApiAvailable()) { return []; }
+    const tools = vscode.lm.tools;
     if (tools.length === 0) { return []; }
     return configuredNames.filter(n => tools.some(t => this.matchesServer(n, t)));
   }
 
   /** Whether `vscode.lm.tools` is available in this VS Code version. */
   isLmApiAvailable(): boolean {
-    return Array.isArray(this.getLm()?.tools);
+    return Array.isArray(vscode.lm?.tools);
   }
 
   resetAll(): void {
@@ -109,22 +107,21 @@ export class UsageTracker implements vscode.Disposable {
   // ── LM tools observation ────────────────────────────────────
 
   private attachLmObserver(): void {
-    const lm = this.getLm();
-    if (!lm) { return; }
+    if (!this.isLmApiAvailable()) { return; }
 
-    this.snapshotTools((lm.tools ?? []) as LmTool[]);
+    this.snapshotTools();
 
-    if (lm.onDidChangeTools) {
-      this.disposables.push(
-        lm.onDidChangeTools(() => {
-          this.snapshotTools((this.getLm()?.tools ?? []) as LmTool[]);
-          this._onChange.fire();
-        }),
-      );
-    }
+    // vscode.lm.onDidChangeTools was removed in VS Code 1.99+.
+    // Poll every 5 s as a lightweight fallback to detect tool changes.
+    const interval = setInterval(() => {
+      this.snapshotTools();
+    }, 5000);
+    // Store a disposable that clears the interval on dispose.
+    this.disposables.push({ dispose: () => clearInterval(interval) });
   }
 
-  private snapshotTools(tools: LmTool[]): void {
+  private snapshotTools(): void {
+    const tools = Array.isArray(vscode.lm.tools) ? vscode.lm.tools : [];
     const currentNames = new Set(tools.map(t => t.name));
 
     for (const [serverName, record] of this.data.entries()) {
@@ -147,9 +144,10 @@ export class UsageTracker implements vscode.Disposable {
 
     this.prevToolNames = currentNames;
     this.save();
+    this._onChange.fire();
   }
 
-  private matchesServer(serverName: string, tool: { name: string; tags?: readonly string[] }): boolean {
+  private matchesServer(serverName: string, tool: { name: string; tags?: readonly string[] | undefined }): boolean {
     // 1. Tag match — most reliable if VS Code surfaces tags for MCP tools
     if (tool.tags?.some(tag => tag.toLowerCase() === serverName.toLowerCase())) {
       return true;
@@ -181,10 +179,6 @@ export class UsageTracker implements vscode.Disposable {
     const obj: Record<string, ServerUsageRecord> = {};
     for (const [k, v] of this.data.entries()) { obj[k] = v; }
     this.context.globalState.update(UsageTracker.STORAGE_KEY, obj);
-  }
-
-  private getLm(): LmNamespace | undefined {
-    return (vscode as unknown as Record<string, unknown>).lm as LmNamespace | undefined;
   }
 
   dispose(): void {

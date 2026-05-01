@@ -5,7 +5,9 @@ src/**
 **/*.map
 **/*.ts
 !out/**
-node_modules/**
 .gitignore
 tsconfig.json
 vitest.config.*
+# devDependencies are excluded by vsce automatically; only production deps (jsonc-parser) are bundled.
+# Do NOT add node_modules/** here — that would strip the jsonc-parser runtime dependency
+# and cause 'Cannot find module jsonc-parser' errors in the installed extension.

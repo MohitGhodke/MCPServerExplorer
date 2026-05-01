@@ -12,11 +12,16 @@ export class McpConfigManager implements vscode.Disposable {
   private disposables: vscode.Disposable[] = [];
   private readonly userDataDir: string;
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(
+    context: vscode.ExtensionContext,
+    private readonly outputChannel: vscode.OutputChannel,
+  ) {
     // Derive the user data directory from globalStorageUri.
     // globalStorageUri = <userDataDir>/globalStorage/<publisher.ext>
     // Going up two levels gives us the active profile's User directory.
     this.userDataDir = path.dirname(path.dirname(context.globalStorageUri.fsPath));
+    this.outputChannel.appendLine(`[McpConfigManager] userDataDir: ${this.userDataDir}`);
+    this.outputChannel.appendLine(`[McpConfigManager] userConfigPath: ${this.getUserConfigPath()}`);
     this.setupWatchers();
   }
 
@@ -32,9 +37,18 @@ export class McpConfigManager implements vscode.Disposable {
       const text = Buffer.from(raw).toString('utf-8');
       const errors: jsonc.ParseError[] = [];
       const parsed = jsonc.parse(text, errors) as McpConfigFile | undefined;
-      if (!parsed) { return { servers: {} }; }
+      if (errors.length > 0) {
+        this.outputChannel.appendLine(`[McpConfigManager] Parse warnings in ${filePath}: ${errors.map(e => `offset ${e.offset}`).join(', ')}`);
+      }
+      if (!parsed) {
+        this.outputChannel.appendLine(`[McpConfigManager] Failed to parse ${filePath} — got null/undefined result`);
+        return { servers: {} };
+      }
+      const serverCount = Object.keys(parsed.servers ?? {}).length;
+      this.outputChannel.appendLine(`[McpConfigManager] Loaded ${serverCount} server(s) from ${filePath}`);
       return { servers: parsed.servers ?? {}, inputs: parsed.inputs, disabledServers: parsed.disabledServers ?? {} };
-    } catch {
+    } catch (err: any) {
+      this.outputChannel.appendLine(`[McpConfigManager] Error reading ${filePath}: ${err?.message ?? String(err)}`);
       return { servers: {} };
     }
   }

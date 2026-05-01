@@ -2,9 +2,6 @@ import * as vscode from 'vscode';
 import { McpConfigManager } from './mcpConfigManager';
 import { McpScope, McpServerConfig } from './models';
 
-type LmTool = { name: string };
-type LmNamespace = { tools?: LmTool[]; onDidChangeTools?: vscode.Event<void> };
-
 /**
  * Manages MCP server lifecycle: restart, disable (stop), and enable (start).
  *
@@ -26,10 +23,13 @@ type LmNamespace = { tools?: LmTool[]; onDidChangeTools?: vscode.Event<void> };
  * to register them as two separate changes (~1.5 s).
  *
  * ## Feedback
- * After a restart or enable, we poll vscode.lm.tools (and listen to
- * vscode.lm.onDidChangeTools) for up to 60 s. Tools appearing → success
- * notification with a tool count. Timeout → informational message (not a
- * scary warning) since the config write itself succeeded.
+ * After a restart or enable, we poll vscode.lm.tools for up to 60 s.
+ * Tools appearing → success notification with a tool count. Timeout →
+ * informational message (not a scary warning) since the config write itself
+ * succeeded.
+ *
+ * NOTE: vscode.lm.onDidChangeTools was removed in VS Code 1.99+; only polling
+ * is used here.
  */
 export class ServerLifecycleManager implements vscode.Disposable {
 
@@ -159,31 +159,22 @@ export class ServerLifecycleManager implements vscode.Disposable {
       const timer = setTimeout(() => done(false), timeoutMs);
       this.pendingTimers.push(timer);
 
-      // Poll every 2 s as a reliable fallback (no race conditions)
+      // Poll every 2 s — vscode.lm.onDidChangeTools was removed in VS Code 1.99+
       const poller = setInterval(() => {
         if (this.serverHasTools(serverName)) { done(true); }
       }, 2000);
       this.pendingIntervals.push(poller);
-
-      // Also listen for the event for faster detection
-      const lm = this.getLm();
-      if (lm?.onDidChangeTools) {
-        const sub = lm.onDidChangeTools(() => {
-          if (this.serverHasTools(serverName)) { done(true); }
-        });
-        cleanups.push(sub);
-      }
     });
   }
 
   private serverHasTools(serverName: string): boolean {
-    const tools = (this.getLm()?.tools ?? []) as LmTool[];
-    return tools.some(t => this.toolMatchesServer(t.name, serverName));
+    if (!Array.isArray(vscode.lm?.tools)) { return false; }
+    return vscode.lm.tools.some(t => this.toolMatchesServer(t.name, serverName));
   }
 
   private countLiveTools(serverName: string): number {
-    const tools = (this.getLm()?.tools ?? []) as LmTool[];
-    return tools.filter(t => this.toolMatchesServer(t.name, serverName)).length;
+    if (!Array.isArray(vscode.lm?.tools)) { return 0; }
+    return vscode.lm.tools.filter(t => this.toolMatchesServer(t.name, serverName)).length;
   }
 
   private toolMatchesServer(toolName: string, serverName: string): boolean {
@@ -197,11 +188,7 @@ export class ServerLifecycleManager implements vscode.Disposable {
   }
 
   private isLmAvailable(): boolean {
-    return Array.isArray(this.getLm()?.tools);
-  }
-
-  private getLm(): LmNamespace | undefined {
-    return (vscode as unknown as Record<string, unknown>).lm as LmNamespace | undefined;
+    return Array.isArray(vscode.lm?.tools);
   }
 
   dispose(): void {

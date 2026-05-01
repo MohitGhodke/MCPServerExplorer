@@ -12,7 +12,7 @@ import { ServerStatusTool } from './serverStatusTool';
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('MCP Server Explorer');
 
-  const configManager = new McpConfigManager(context);
+  const configManager = new McpConfigManager(context, outputChannel);
   const usageTracker = new UsageTracker(context);
   const lifecycleManager = new ServerLifecycleManager(configManager);
   const serverTreeProvider = new ServerTreeProvider(configManager);
@@ -311,7 +311,7 @@ async function addServerWithCopilot(
   });
   if (!description?.trim()) { return; }
 
-  const models = await vscode.lm.selectChatModels({ vendor: 'copilot', family: 'gpt-4o' });
+  const models = await vscode.lm.selectChatModels({ vendor: 'copilot' });
   if (models.length === 0) {
     vscode.window.showErrorMessage('MCP Server Explorer: Copilot model not available. Please ensure GitHub Copilot is active.');
     return;

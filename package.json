@@ -2,7 +2,7 @@
   "name": "mcp-server-explorer-copilot-ready",
   "displayName": "MCP Server Explorer · Copilot Ready",
   "description": "Browse, manage, and import/export MCP (Model Context Protocol) server configurations from a unified sidebar — no JSON editing required. Copilot-integrated with @mcp-explorer chat participant.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "mohitghodke",
   "preview": true,
   "license": "MIT",

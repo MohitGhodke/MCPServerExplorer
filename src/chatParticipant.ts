@@ -217,7 +217,6 @@ export class ChatParticipant implements vscode.Disposable {
     stream.markdown('\n**Analysis**\n');
     const models = await vscode.lm.selectChatModels({
       vendor: 'copilot',
-      family: 'gpt-4o',
     });
 
     if (models.length > 0 && !token.isCancellationRequested) {
@@ -285,7 +284,6 @@ export class ChatParticipant implements vscode.Disposable {
 
     const models = await vscode.lm.selectChatModels({
       vendor: 'copilot',
-      family: 'gpt-4o',
     });
 
     if (models.length === 0) {
@@ -391,7 +389,7 @@ export class ChatParticipant implements vscode.Disposable {
 
     const models = await vscode.lm.selectChatModels({
       vendor: 'copilot',
-      family: 'gpt-4o',
+
     });
 
     if (models.length === 0) {
@@ -439,7 +437,6 @@ export class ChatParticipant implements vscode.Disposable {
   ): Promise<{ name: string; scope: McpScope; serverConfig: McpServerConfig } | undefined> {
     const models = await vscode.lm.selectChatModels({
       vendor: 'copilot',
-      family: 'gpt-4o',
     });
 
     if (models.length === 0) {
