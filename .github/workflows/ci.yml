@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc -p ./ --noEmit
+
+      # Packages a real .vsix so a broken .vscodeignore or a missing runtime
+      # dependency fails here rather than in someone's editor.
+      - name: Package
+        run: npx @vscode/vsce package --out /tmp/extension.vsix

@@ -10,6 +10,10 @@
     "type": "git",
     "url": "https://github.com/MohitGhodke/MCPServerExplorer"
   },
+  "bugs": {
+    "url": "https://github.com/MohitGhodke/MCPServerExplorer/issues"
+  },
+  "homepage": "https://github.com/MohitGhodke/MCPServerExplorer#readme",
   "icon": "resources/mcp-icon.png",
   "engines": {
     "vscode": "^1.95.0"
@@ -302,6 +306,40 @@
           "when": "view == mcpServerExplorerServersView && viewItem == scopeWorkspace",
           "group": "inline@1"
         }
+      ],
+      "commandPalette": [
+        {
+          "command": "mcpServerExplorer.removeServer",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.editServer",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.exportServer",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.copyServerConfig",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.restartServer",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.stopServer",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.startServer",
+          "when": "false"
+        },
+        {
+          "command": "mcpServerExplorer.chatAddServer",
+          "when": "false"
+        }
       ]
     },
     "viewsWelcome": [
@@ -318,9 +356,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts",
-    "test": "vitest run"
+    "watch": "tsc -watch -p ./"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"

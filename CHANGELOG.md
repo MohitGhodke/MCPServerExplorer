@@ -1,6 +1,25 @@
 # Changelog
 
-## [0.1.0] - 2026-04-17
+All notable changes to **MCP Server Explorer · Copilot Ready** are documented here.
+
+---
+
+## [0.1.2] — 2026-05-01
+
+### Fixed
+
+- **Tool detection on VS Code 1.99+** — `vscode.lm.onDidChangeTools` was removed from the API, so the event listener used to detect a server's tools appearing after a start or restart never fired. Detection now relies solely on polling `vscode.lm.tools` every 2 s for up to 60 s, which works across versions.
+- **Silent config read failures** — errors while reading an `mcp.json` were swallowed by a bare `catch {}`. Read failures are now logged to the output channel with the underlying message, so a malformed or unreadable config is diagnosable instead of showing an empty tree.
+
+### Changed
+
+- Removed the hand-rolled `LmNamespace` / `LmTool` shims and the `getLm()` feature-detection helper in favour of reading `vscode.lm` directly with an `Array.isArray` guard.
+
+## [0.1.1] — 2026-04-17
+
+- Initial published release.
+
+## [0.1.0] — 2026-04-17
 
 ### Added
 

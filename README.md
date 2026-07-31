@@ -22,7 +22,7 @@ Browse, manage, and import/export MCP (Model Context Protocol) server configurat
 - **`/suggest`** — Get personalized MCP server recommendations based on your workspace
 - **`/share [name]`** — Generate formatted server config for sharing in README or Slack
 - **Describe with Copilot** — When adding servers via the **+** button, choose "Describe with Copilot" to generate config from plain English
-- **Language Model Tool** — Exposes `mcpServerExplorer_getServerStatus` so other Copilot agents can query your MCP server status
+- **`#mcpServerStatus` Language Model Tool** — Lets Copilot's agent (and any other agent) query the status and tool counts of your configured MCP servers. Reference it directly in chat with `#mcpServerStatus`, or just ask a question like *"are my MCP servers running?"* and the agent will call it automatically.
 
 ## Where are MCP configs stored?
 
@@ -40,14 +40,28 @@ Browse, manage, and import/export MCP (Model Context Protocol) server configurat
 
 ## Commands
 
+Available from the command palette (all prefixed **MCP Server Explorer:**):
+
 | Command | Description |
 |---------|-------------|
-| `MCP Server Explorer: Add MCP Server` | Guided flow to add a new server |
-| `MCP Server Explorer: Refresh` | Reload configs from disk |
-| `MCP Server Explorer: Import Server Configs` | Import servers from a JSON file |
-| `MCP Server Explorer: Export All Server Configs` | Export all servers to a JSON file |
-| `MCP Server Explorer: Open User MCP Config` | Open user-level `mcp.json` |
-| `MCP Server Explorer: Open Workspace MCP Config` | Open workspace-level `mcp.json` |
+| `Add MCP Server` | Guided flow to add a new server |
+| `Refresh` | Reload configs from disk |
+| `Import Server Configs` | Import servers from a JSON file |
+| `Export All Server Configs` | Export all servers to a JSON file |
+| `Open User MCP Config` | Open user-level `mcp.json` |
+| `Open Workspace MCP Config` | Open workspace-level `mcp.json` |
+| `Refresh Dashboard` | Recompute the server counts shown in the Dashboard |
+| `Reset Activity Statistics` | Clear recorded server activity stats |
+
+These act on a specific server and are available from the right-click menu on any server in the tree:
+
+| Command | Description |
+|---------|-------------|
+| `Start Server` / `Stop Server` / `Restart Server` | Control the server's lifecycle and wait for its tools to register |
+| `Remove Server` | Delete the server from its config file |
+| `Edit Server in Config` | Jump to the server's entry in `mcp.json` |
+| `Export Server Config` | Write a single server's config to a JSON file |
+| `Copy Server Config to Clipboard` | Copy a single server's config for sharing |
 
 ## Import/Export Format
 
